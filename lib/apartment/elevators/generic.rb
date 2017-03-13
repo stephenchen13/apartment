@@ -15,7 +15,9 @@ module Apartment
       def call(env)
         request = Rack::Request.new(env)
 
-        database = @processor.call(request)
+        unless Apartment.exclude_request_regex && request.path =~ Apartment.exclude_request_regex
+          database = @processor.call(request)
+        end
 
         if database
           Apartment::Tenant.switch(database) { @app.call(env) }
